@@ -4,7 +4,7 @@ import * as groups from './groups.js';
 import { new_element } from './utils.js';
 import { getTabNode } from './tabNodes.js';
 
-export var groupNodes = {};
+var groupNodes = {};
 
 export async function initGroupNodes(groupsNode) {
 
@@ -403,6 +403,10 @@ export async function insertTab(tab) {
     }
 }
 
+export function insertNewTab(groupId, dragTab){
+    groupNodes[groupId].newtab.insertAdjacentElement('beforebegin', dragTab);
+}
+
 export function resizeGroups(groupId, groupRect) {
 
     var rect = {};
@@ -583,4 +587,23 @@ export function updateGroupFit(group) {
 
         index++;
     }
+}
+
+export function getGroups(){
+    return Object.keys(groupNodes)
+    .filter(id => id !== 'pinned')
+    .map(id => ({
+        id: Number(id),
+        tabs: getTabsInGroup(id)
+    }));
+}
+
+export function getTabsInGroup(groupId){
+    var childNodes = groupNodes[groupId].content.childNodes;
+
+    var result = [];
+    for (var i = 0; i < childNodes.length-1; i++) {
+        result.push(Number(childNodes[i].getAttribute('tabId')));
+    }
+    return result;
 }

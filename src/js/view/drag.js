@@ -1,5 +1,5 @@
 import { setGroupId, getGroupId } from './tabs.js';
-import { groupNodes, makeGroupNode, resizeGroups, updateGroupFit, insertTab } from './groupNodes.js';
+import { makeGroupNode, resizeGroups, updateGroupFit, insertTab, insertNewTab } from './groupNodes.js';
 import * as groups from './groups.js';
 import { new_element } from './utils.js';
 
@@ -144,7 +144,7 @@ export function groupDragOver(e) {
 }
 
 async function putTabInGroup(groupId) {
-	groupNodes[groupId].newtab.insertAdjacentElement('beforebegin', dragTab);
+	insertNewTab(groupId, dragTab)
 
 	groups.forEach(function(group) {
 		updateGroupFit(group);
@@ -164,14 +164,12 @@ export async function outsideDrop(e) {
         e.stopPropagation();
 
         var group = await groups.create();
-        makeGroupNode(group);
+        var groupElement = makeGroupNode(group);
 
         group.rect.x = (e.clientX - 75) / window.innerWidth;
         group.rect.y = (e.clientY - 75) / window.innerHeight;
         group.rect.w = 150 / window.innerWidth;
         group.rect.h = 150 / window.innerHeight;
-
-        var groupElement = groupNodes[group.id].group;
 
         e.target.appendChild(groupElement);
 
