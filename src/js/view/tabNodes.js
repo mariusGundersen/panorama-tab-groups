@@ -11,16 +11,20 @@ export function getTabNode(tabId){
 
 export async function initTabNodes(tabId) {
 
-	await forEachTab(async function(tab) {
-		makeTabNode(tab);
-		updateTabNode(tab);
-		updateFavicon(tab);
-		updateThumbnail(tab.id);
-	});
-	setActiveTabNode(tabId);
+    const tabs = await getLastActiveTabs(tabId);
+
+    if(tabs.length == 0) return;
+
+    activeTabId = tabs[0].id;
+    tabs.forEach((tab, i) => {
+        makeTabNode(tab, i == 0);
+        updateTabNode(tab);
+        updateFavicon(tab);
+        updateThumbnail(tab.id);
+    });
 }
 
-export function makeTabNode(tab) {
+export function makeTabNode(tab, selected = false) {
 
 	var thumbnail = new_element('div', {class: 'thumbnail'});
 	var favicon = new_element('div', {class: 'favicon'});
@@ -34,7 +38,7 @@ export function makeTabNode(tab) {
 		name
 	])
 
-	var node = new_element('div', {class: 'tab', draggable: 'true', tabId: tab.id}, [inner]);
+	var node = new_element('div', {class: selected ? 'tab selected' : 'tab', draggable: 'true', tabId: tab.id}, [inner]);
 
 	node.addEventListener('click', async function(event) {
 		event.preventDefault();
@@ -105,27 +109,26 @@ export async function updateTabNode(tab) {
  * class, removing selected from all other thumbnails
  */
 export async function setActiveTabNode(tabId) {
+    const tabs = await getLastActiveTabs(tabId);
 
-	var lastActive = -1;
-	var lastAccessed = 0;
+    activeTabId = tabs.shift().id;
+    tabNodes[activeTabId].tab.classList.add('selected');
 
-	await forEachTab(async function(tab) {
+    for(const tab of tabs){
+        // Can race if deleteTabNode is called at the same time (e.g. every time
+        // the active tab is closed, since a new tab becomes active), so confirm
+        // the tab is still in tabNodes
+        if (tabNodes[tab.id]) {
+            tabNodes[tab.id].tab.classList.remove('selected');
+        }
+    }
+}
 
-		// Can race if deleteTabNode is called at the same time (e.g. every time
-		// the active tab is closed, since a new tab becomes active), so confirm
-		// the tab is still in tabNodes
-		if (tabNodes[tab.id]) {
-			tabNodes[tab.id].tab.classList.remove('selected');
-		}
-
-		if(tab.lastAccessed > lastAccessed && tab.id != tabId) {
-			lastAccessed = tab.lastAccessed;
-			lastActive = tab.id;
-		}
-	});
-
-	tabNodes[lastActive].tab.classList.add('selected');
-    activeTabId = lastActive;
+async function getLastActiveTabs(tabId) {
+    return await browser.tabs.query({ currentWindow: true })
+        .then(tabs => tabs
+            .filter(tab => tab.id !== tabId)
+            .sort((a, b) => a.lastAccessed < b.lastAccessed));
 }
 
 // Remove selected from all other thumbnails, add to tab with id given
