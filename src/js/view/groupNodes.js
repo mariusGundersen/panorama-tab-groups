@@ -2,7 +2,7 @@ import { getGroupId, forEachTab } from './tabs.js';
 import { groupDragOver, groupDrop } from './drag.js';
 import * as groups from './groups.js';
 import { new_element } from './utils.js';
-import { tabNodes, getTabNode } from './tabNodes.js';
+import { getTabNode } from './tabNodes.js';
 
 export var groupNodes = {};
 
@@ -393,12 +393,12 @@ export async function insertTab(tab) {
             index++;
         }
 
-        var tabNode = tabNodes[tab.id];
+        var tabNode = getTabNode(tab.id);
 
         if(index < childNodes.length-1) {
-            childNodes[index].insertAdjacentElement('beforebegin', tabNode.tab);
+            childNodes[index].insertAdjacentElement('beforebegin', tabNode);
         }else{
-            groupNodes[groupId].newtab.insertAdjacentElement('beforebegin', tabNode.tab);
+            groupNodes[groupId].newtab.insertAdjacentElement('beforebegin', tabNode);
         }
     }
 }
