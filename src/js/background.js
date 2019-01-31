@@ -96,6 +96,7 @@ async function tabCreated(tab) {
 
 			while(activeGroup === undefined) {
 				activeGroup = (await browser.sessions.getWindowValue(tab.windowId, 'activeGroup'));
+				await delay(10);
 			}
 
 			browser.sessions.setTabValue(tab.id, 'groupId', activeGroup);
@@ -136,6 +137,7 @@ async function tabActivated(activeInfo) {
 	var activeGroup = undefined;
 	while (activeGroup === undefined) {
 		activeGroup = await browser.sessions.getTabValue(activeInfo.tabId, 'groupId');
+		await delay(10);
 	}
 
 	if(activeGroup != -1) {
@@ -357,3 +359,5 @@ function onRuntimeInstallNotification(details) {
 }
 
 browser.runtime.onInstalled.addListener(onRuntimeInstallNotification);
+
+const delay = ms => new Promise(res => setTimeout(res, ms));

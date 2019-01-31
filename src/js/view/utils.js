@@ -16,3 +16,5 @@ export function new_element(name, attributes, children) {
     }
     return e;
 }
+
+export const delay = ms => new Promise(res => setTimeout(res, ms));

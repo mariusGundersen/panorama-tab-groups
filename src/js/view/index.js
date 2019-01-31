@@ -3,6 +3,7 @@ import { tabMoved, groupDragOver, outsideDrop, createDragIndicator } from './dra
 import { initGroupNodes, closeGroup, makeGroupNode, fillGroupNodes, insertTab, resizeGroups, updateGroupFit, getTabsInGroup, getGroups } from './groupNodes.js';
 import { initTabNodes, makeTabNode, updateTabNode, setActiveTabNode, setActiveTabNodeById, getActiveTabId, deleteTabNode, updateThumbnail, updateFavicon } from './tabNodes.js';
 import * as groups from './groups.js';
+import { delay } from './utils.js';
 
 var view = {
     windowId: -1,
@@ -238,6 +239,7 @@ async function tabCreated(tab) {
         var groupId = undefined;
         while(groupId === undefined) {
             groupId = await getGroupId(tab.id);
+            await delay(10);
         }
 
         var group = groups.get(groupId);
